@@ -12,6 +12,8 @@ module Nifti
     attr_reader :str_endian
     # An array of warning/error messages that (may) have been accumulated.
     attr_reader :errors
+    # 
+    attr_reader :format
     
     # Creates a Stream instance.
     #
@@ -254,6 +256,18 @@ module Nifti
       "UT" => @str,
       "STR" => @str
     }
+  end
+  
+  # Encodes a value and returns the resulting binary string.
+  #
+  # === Parameters
+  #
+  # * <tt>value</tt> -- A custom value (String, Fixnum, etc..) or an array of numbers.
+  # * <tt>type</tt> -- String. The type (vr) of data to encode.
+  #
+  def encode(value, type)
+    value = [value] unless value.is_a?(Array)
+    return value.pack(vr_to_str(type))
   end
   
 end

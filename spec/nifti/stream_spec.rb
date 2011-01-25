@@ -40,4 +40,5 @@ describe Nifti::Stream do
     @stream.skip 40
     @stream.decode(16, "US").should == [3, 256, 256, 15, 1, 1, 1, 1]
   end
+
 end
