@@ -8,6 +8,8 @@ module Nifti
     attr_reader :success
     # A hash containing header attributes.
     attr_reader :hdr
+    # An array of nifti header extension hashes with keys esize, ecode and data.
+    attr_reader :extended_header
     # An array of decoded image values
     attr_reader :image_rubyarray
     # A narray of image values reshapred to image dimensions
@@ -35,11 +37,11 @@ module Nifti
     # * <tt>:narray</tt> -- Boolean.  If set to true, a properly shaped narray matrix will be set in the instance variable @image_narray
     #
     def initialize(source=nil, options={})
-      @msg = []
+      @msg = [], @success = false
       set_stream(source, options)
       parse_header(options)
     end
-        
+    
     private
     
     # Initializes @stream from a binary string or filename
@@ -71,13 +73,12 @@ module Nifti
     # Parse the Nifti Header.
     def parse_header(options = {})
       check_header
-      @hdr = parse_basic_header(@stream)
-      @hdr.merge parse_extended_header(@stream)
-      read_image(@stream)
+      @hdr = parse_basic_header
+      @extended_header = parse_extended_header
+      read_image
       if options[:narray]
         get_image_narray(@image_rubyarray, @hdr['dim'])
       end
-      
       
       @success = true
     end
@@ -113,187 +114,65 @@ module Nifti
     end
 
     # Read the nifti header according to its byte signature.
-    # The file stream will be left open and should be left positioned at the imaging
-    # data itself, taking vox_offset into account for Nifti Header Extended Attributes.
-    def parse_basic_header(stream)
+    # The file stream will be left open and should be positioned at the end of the 348 byte header. 
+    def parse_basic_header
+      # The HEADER_SIGNATURE is defined in Nifti::Constants and used for both reading and writing.
       header = {}
-      
-      #                           /**********************/    /**********************/     /***************/
-      # struct nifti_1_header {  /* NIFTI-1 usage      */    /*ANALYZE 7.5 field(s)*/     /* Byte offset */
-      #                         /**********************/    /**********************/     /***************/
-      # 
-      # 
-      # 
-      # 
-      #  int   sizeof_hdr;    /*!< MUST be 348           */  /* int sizeof_hdr;      */   /*   0 */
-      header['sizeof_hdr'] = stream.decode(4, "UL")
-
-      #  char  data_type[10]; /*!< ++UNUSED++            */  /* char data_type[10];  */   /*   4 */
-      header['data_type']   = stream.decode(10, "STR")
-
-      #  char  db_name[18];   /*!< ++UNUSED++            */  /* char db_name[18];    */   /*  14 */
-      header['db_name']     = stream.decode(18, "STR")
-       
-      #  int   extents;       /*!< ++UNUSED++            */  /* int extents;         */   /*  32 */
-      header['extents']     = stream.decode(4, "UL")
-      
-      #  short session_error; /*!< ++UNUSED++            */  /* short session_error; */   /*  36 */
-      header['session_error'] = stream.decode(2, "US")
-      
-      #  char  regular;       /*!< ++UNUSED++            */  /* char regular;        */   /*  38 */
-      header['regular']     = stream.decode(1, "STR")
-      
-      #  char  dim_info;      /*!< MRI slice ordering.   */  /* char hkey_un0;       */   /*  39 */
-      header['dim_info']    = stream.decode(1, "BY")
-      
-      
-      #                                       /*--- was image_dimension substruct ---*/
-      #  short dim[8];        /*!< Data array dimensions.*/  /* short dim[8];        */   /*  40 */
-      header['dim']         = stream.decode(16, "US")
-      
-      #  float intent_p1;     /*!< 1st intent parameter. */  /* short unused8;       */   /*  56 */
-      header['intent_p1']   = stream.decode(4, "FL")
-      #                                                      /* short unused9;       */
-      #  float intent_p2;     /*!< 2nd intent parameter. */  /* short unused10;      */   /*  60 */
-      header['intent_p2']   = stream.decode(4, "FL")
-      #                                                      /* short unused11;      */
-      #  float intent_p3;     /*!< 3rd intent parameter. */  /* short unused12;      */   /*  64 */
-      header['intent_p3']   = stream.decode(4, "FL")
-
-      #  short intent_code;   /*!< NIFTIINTENT code.     */  /* short unused14;      */   /*  68 */
-      header['intent_code']   = stream.decode(2, "US")
-
-      #  short datatype;      /*!< Defines data type!    */  /* short datatype;      */   /*  70 */
-      header['datatype']   = stream.decode(2, "US")
-      
-      #  short bitpix;        /*!< Number bits/voxel.    */  /* short bitpix;        */   /*  72 */
-      header['bitpix']     = stream.decode(2, "US")
-      
-      #  short slice_start;   /*!< First slice index.    */  /* short dim_un0;       */   /*  74 */
-      header['slice_start']   = stream.decode(2, "US")
-      
-      #  float pixdim[8];     /*!< Grid spacings.        */  /* float pixdim[8];     */   /*  76 */
-      header['pixdim']   = stream.decode(32, "FL")
-      
-      #  float vox_offset;    /*!< Offset into .nii file */  /* float vox_offset;    */   /* 108 */
-      header['vox_offset']   = stream.decode(4, "FL")
-      
-      #  float scl_slope;     /*!< Data scaling: slope.  */  /* float funused1;      */   /* 112 */
-      header['scl_slope']   = stream.decode(4, "FL")
-      
-      #  float scl_inter;     /*!< Data scaling: offset. */  /* float funused2;      */   /* 116 */
-      header['scl_inter']   = stream.decode(4, "FL")
-      
-      #  short slice_end;     /*!< Last slice index.     */  /* float funused3;      */   /* 120 */
-      header['slice_end']   = stream.decode(2, "US")
-      
-      #  char  slice_code;    /*!< Slice timing order.   */                               /* 122 */
-      header['slice_code']   = stream.decode(1, "BY")
-      
-      #  char  xyzt_units;    /*!< Units of pixdim[1..4] */                               /* 123 */
-      header['xyzt_units']   = stream.decode(1, "BY")
-
-      #  float cal_max;       /*!< Max display intensity */  /* float cal_max;       */   /* 124 */
-      header['cal_max']   = stream.decode(4, "FL")
-      
-      #  float cal_min;       /*!< Min display intensity */  /* float cal_min;       */   /* 128 */
-      header['cal_min']   = stream.decode(4, "FL")
-      
-      #  float slice_duration;/*!< Time for 1 slice.     */  /* float compressed;    */   /* 132 */
-      header['slice_duration']   = stream.decode(4, "FL")
-      
-      #  float toffset;       /*!< Time axis shift.      */  /* float verified;      */   /* 136 */
-      header['toffset']   = stream.decode(4, "FL")
-
-      #  int   glmax;         /*!< ++UNUSED++            */  /* int glmax;           */   /* 140 */
-      header['glmax']   = stream.decode(4, "UL")
-      
-      #  int   glmin;         /*!< ++UNUSED++            */  /* int glmin;           */   /* 144 */
-      header['glmin']   = stream.decode(4, "UL")
-
-      #                                          /*--- was data_history substruct ---*/
-      #  char  descrip[80];   /*!< any text you like.    */  /* char descrip[80];    */   /* 148 */
-      header['descrip']   = stream.decode(80, "STR")
-      
-      #  char  aux_file[24];  /*!< auxiliary filename.   */  /* char aux_file[24];   */   /* 228 */
-      header['aux_file']   = stream.decode(24, "STR")
-
-      # 
-      #  short qform_code;    /*!< NIFTIXFORM code.      */  /*-- all ANALYZE 7.5 ---*/   /* 252 */
-      header['qform_code']   = stream.decode(2, "US")   #    /*   fields below here  */
-                                                        #    /*   are replaced       */
-      #  short sform_code;    /*!< NIFTIXFORM code.      */                               /* 254 */
-      header['sform_code']  = stream.decode(2, "US")
-      #                                                      
-      #  float quatern_b;     /*!< Quaternion b param.    */                              /* 256 */
-      header['quatern_b']   = stream.decode(4, "FL")
-
-      #  float quatern_c;     /*!< Quaternion c param.    */                              /* 260 */
-      header['quatern_c']   = stream.decode(4, "FL")
-
-      #  float quatern_d;     /*!< Quaternion d param.    */                              /* 264 */
-      header['quatern_d']   = stream.decode(4, "FL")
-
-
-      #  float qoffset_x;     /*!< Quaternion x shift.    */                              /* 268 */
-      header['qoffset_x']   = stream.decode(4, "FL")
-
-      #  float qoffset_y;     /*!< Quaternion y shift.    */                              /* 272 */
-      header['qoffset_y']   = stream.decode(4, "FL")
-      
-      #  float qoffset_z;     /*!< Quaternion z shift.    */                              /* 276 */
-      header['qoffset_z']   = stream.decode(4, "FL")
-
-      #  float srow_x[4];     /*!< 1st row affine transform.   */                         /* 280 */
-      header['srow_x']      = stream.decode(16, "FL")
-      
-      #  float srow_y[4];     /*!< 2nd row affine transform.   */                         /* 296 */
-      header['srow_y']      = stream.decode(16, "FL")
-
-      #  float srow_z[4];     /*!< 3rd row affine transform.   */                         /* 312 */
-      header['srow_z']      = stream.decode(16, "FL")
-
-      # 
-      # 
-      #  char intent_name[16];/*!< name or meaning of data.  */                         /* 328 */
-      header['intent_name'] = stream.decode(16, "STR")
-
-      # 
-      # 
-      #  char magic[4];       /*!< MUST be "ni1\0" or "n+1\0". */                         /* 344 */
-      header['magic'] = stream.decode(4, "STR")
-
-      # } ;                   /** 348 bytes total **/
-      # 
-      # 
+      HEADER_SIGNATURE.each do |header_item| 
+        name, length, type = *header_item
+        header[name] = @stream.decode(length, type)
+      end
       
       # Extract Freq, Phase & Slice Dimensions from diminfo
-      header['freq_dim'] = dim_info_to_freq_dim(header['dim_info'])
-      header['phase_dim'] = dim_info_to_phase_dim(header['dim_info'])
-      header['slice_dim'] = dim_info_to_slice_dim(header['dim_info'])
+      if header['dim_info']
+        header['freq_dim'] = dim_info_to_freq_dim(header['dim_info'])
+        header['phase_dim'] = dim_info_to_phase_dim(header['dim_info'])
+        header['slice_dim'] = dim_info_to_slice_dim(header['dim_info'])
+      end
       header['sform_code_descr'] = XFORM_CODES[header['sform_code']]
       header['qform_code_descr'] = XFORM_CODES[header['qform_code']]
             
       return header
     end
 
-    # TODO : Work up Extensions    
-    def parse_extended_header(stream)
-      header = {}
-      # header['extension'] = stream.decode(4, "BY")
-      # header['extension1']  = stream.decode(8, "UL")
-      # header['extension1_data'] = stream.decode(header['extension1'].first - 8, "STR")      
-      # stream.decode(header['vox_offset'] - stream.index, "STR")
-      # stream.skip header['vox_offset'] - stream.index
+    # Read any extended header information.
+    # The file stream will be left at imaging data itself, taking vox_offset into account for Nifti Header Extended Attributes.
+    # Pass in the voxel offset so the extended header knows when to stop reading.
+
+    def parse_extended_header
+      extended = []
+      extension = @stream.decode(4, "BY")
+
+      # "After the end of the 348 byte header (e.g., after the magic field),
+      # the next 4 bytes are an byte array field named extension. By default,
+      # all 4 bytes of this array should be set to zero. In a .nii file, these 4
+      # bytes will always be present, since the earliest start point for the
+      # image data is byte #352. In a separate .hdr file, these bytes may or may
+      # not be present (i.e., a .hdr file may only be 348 bytes long). If not
+      # present, then a NIfTI-1.1 compliant program should use the default value
+      # of extension={0,0,0,0}. The first byte (extension[0]) is the only value
+      # of this array that is specified at present. The other 3 bytes are
+      # reserved for future use."
+      if extension[0] != 0
+        while @stream.index < @hdr['vox_offset']
+          esize, ecode = *@stream.decode(8, "UL")
+          data = @stream.decode(esize - 8, "STR")
+          extended << {:esize => esize, :ecode => ecode, :data => data}
+        end
+        # stream.decode(header['vox_offset'] - stream.index, "STR")
+        # stream.skip header['vox_offset'] - stream.index
+      end
+      return extended
     end
     
-    def read_image(stream)
+    # Read an image array from the end of the nifti file.  Jumps straight to vox_offset irregardless of whether it's there or not.
+    def read_image
       set_datatype
       raw_image = []
-      stream.index = @hdr['vox_offset']
+      @stream.index = @hdr['vox_offset']
       type = @datatypes[@hdr['datatype']]
-      format = stream.format[type]
-      @image_rubyarray = stream.decode(stream.rest_length, type)
+      format = @stream.format[type]
+      @image_rubyarray = @stream.decode(@stream.rest_length, type)
     end
     
     # Take a Nifti TypeCode and return datatype and bitpix

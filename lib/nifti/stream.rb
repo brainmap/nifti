@@ -34,6 +34,8 @@ module Nifti
       self.endian = string_endian
     end
     
+
+    
     # Decodes a section of the instance string and returns the formatted data.
     # The instance index is offset in accordance with the length read.
     #
@@ -70,23 +72,7 @@ module Nifti
         end
       end
       return value
-    end
-    
-    
-    # Sets the endianness of the instance string. The relationship between the string endianness and
-    # the system endianness, determines which encoding/decoding flags to use.
-    #
-    # === Parameters
-    #
-    # * <tt>string_endian</tt> -- Boolean. The endianness of the instance string (true for big endian, false for small endian).
-    #
-    def endian=(string_endian)
-      @str_endian = string_endian
-      configure_endian
-      set_string_formats
-      set_format_hash
-    end
-    
+    end    
     
     # Returns the length of the binary instance string.
     #
@@ -158,7 +144,22 @@ module Nifti
       @index += offset
     end
     
-    # Following methods are private:
+    # Converts a data type/vr to an encode/decode string used by the pack/unpack methods, which is returned.
+    #
+    # === Parameters
+    #
+    # * <tt>vr</tt> -- String. A data type (value representation).
+    #
+    def vr_to_str(vr)
+      unless @format[vr]
+        errors << "Warning: Element type #{vr} does not have a reading method assigned to it. Something is not implemented correctly or the DICOM data analyzed is invalid."
+        return @hex
+      else
+        return @format[vr]
+      end
+    end
+    
+    # # Following methods are private:
     private
 
 
@@ -203,71 +204,71 @@ module Nifti
       @str = "a*"
       @hex = "H*" # (this may be dependent on endianness(?))
     end
-  end
   
-  # Converts a data type/vr to an encode/decode string used by the pack/unpack methods, which is returned.
-  #
-  # === Parameters
-  #
-  # * <tt>vr</tt> -- String. A data type (value representation).
-  #
-  def vr_to_str(vr)
-    unless @format[vr]
-      errors << "Warning: Element type #{vr} does not have a reading method assigned to it. Something is not implemented correctly or the DICOM data analyzed is invalid."
-      return @hex
-    else
-      return @format[vr]
+    # Sets the hash which is used to convert data element types (VR) to
+    # encode/decode strings accepted by the pack/unpack methods.
+    #
+    def set_format_hash
+      @format = {
+        "BY" => @by, # Byte/Character (1-byte integers)
+        "US" => @us, # Unsigned short (2 bytes)
+        "SS" => @ss, # Signed short (2 bytes)
+        "UL" => @ul, # Unsigned long (4 bytes)
+        "SL" => @sl, # Signed long (4 bytes)
+        "FL" => @fs, # Floating point single (4 bytes)
+        "FD" => @fd, # Floating point double (8 bytes)
+        "OB" => @by, # Other byte string (1-byte integers)
+        "OF" => @fs, # Other float string (4-byte floating point numbers)
+        "OW" => @us, # Other word string (2-byte integers)
+        "AT" => @hex, # Tag reference (4 bytes) NB: This may need to be revisited at some point...
+        "UN" => @hex, # Unknown information (header element is not recognized from local database)
+        "HEX" => @hex, # HEX
+        # We have a number of VRs that are decoded as string:
+        "AE" => @str,
+        "AS" => @str,
+        "CS" => @str,
+        "DA" => @str,
+        "DS" => @str,
+        "DT" => @str,
+        "IS" => @str,
+        "LO" => @str,
+        "LT" => @str,
+        "PN" => @str,
+        "SH" => @str,
+        "ST" => @str,
+        "TM" => @str,
+        "UI" => @str,
+        "UT" => @str,
+        "STR" => @str
+      }
     end
-  end
   
-  # Sets the hash which is used to convert data element types (VR) to
-  # encode/decode strings accepted by the pack/unpack methods.
-  #
-  def set_format_hash
-    @format = {
-      "BY" => @by, # Byte/Character (1-byte integers)
-      "US" => @us, # Unsigned short (2 bytes)
-      "SS" => @ss, # Signed short (2 bytes)
-      "UL" => @ul, # Unsigned long (4 bytes)
-      "SL" => @sl, # Signed long (4 bytes)
-      "FL" => @fs, # Floating point single (4 bytes)
-      "FD" => @fd, # Floating point double (8 bytes)
-      "OB" => @by, # Other byte string (1-byte integers)
-      "OF" => @fs, # Other float string (4-byte floating point numbers)
-      "OW" => @us, # Other word string (2-byte integers)
-      "AT" => @hex, # Tag reference (4 bytes) NB: This may need to be revisited at some point...
-      "UN" => @hex, # Unknown information (header element is not recognized from local database)
-      "HEX" => @hex, # HEX
-      # We have a number of VRs that are decoded as string:
-      "AE" => @str,
-      "AS" => @str,
-      "CS" => @str,
-      "DA" => @str,
-      "DS" => @str,
-      "DT" => @str,
-      "IS" => @str,
-      "LO" => @str,
-      "LT" => @str,
-      "PN" => @str,
-      "SH" => @str,
-      "ST" => @str,
-      "TM" => @str,
-      "UI" => @str,
-      "UT" => @str,
-      "STR" => @str
-    }
-  end
-  
-  # Encodes a value and returns the resulting binary string.
-  #
-  # === Parameters
-  #
-  # * <tt>value</tt> -- A custom value (String, Fixnum, etc..) or an array of numbers.
-  # * <tt>type</tt> -- String. The type (vr) of data to encode.
-  #
-  def encode(value, type)
-    value = [value] unless value.is_a?(Array)
-    return value.pack(vr_to_str(type))
+    # Encodes a value and returns the resulting binary string.
+    #
+    # === Parameters
+    #
+    # * <tt>value</tt> -- A custom value (String, Fixnum, etc..) or an array of numbers.
+    # * <tt>type</tt> -- String. The type (vr) of data to encode.
+    #
+    def encode(value, type)
+      value = [value] unless value.is_a?(Array)
+      return value.pack(vr_to_str(type))
+    end
+
+    # Sets the endianness of the instance string. The relationship between the string endianness and
+    # the system endianness, determines which encoding/decoding flags to use.
+    #
+    # === Parameters
+    #
+    # * <tt>string_endian</tt> -- Boolean. The endianness of the instance string (true for big endian, false for small endian).
+    #
+    def endian=(string_endian)
+      @str_endian = string_endian
+      configure_endian
+      set_string_formats
+      set_format_hash
+    end
+
   end
   
 end
