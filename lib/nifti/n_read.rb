@@ -9,17 +9,35 @@ module Nifti
     # A hash containing header attributes.
     attr_reader :hdr
     # An array of decoded image values
-    attr_reader :image
+    attr_reader :image_rubyarray
+    # A narray of image values reshapred to image dimensions
     attr_reader :image_narray
     
     # Valid Magic codes for the Nifti Header
     MAGIC = %w{ni1 n+1}
     
-    # Create a NRead object to parse a nifti file or binary string and set
-    # header and image info instance variables.
+    # Create a NRead object to parse a nifti file or binary string and set header and image info instance variables.
+    #
+    # The nifti header will be checked for validity (header size and magic number) and will raise an IOError if invalid.
+    # 
+    # Nifti header extensions are not yet supported and are not included in the header.
+    #
+    # The header and image are accessible via the hdr and image instance variables.  An optional narray matrix may also be available in image_narray if desired by passing in :narray => true as an option.
+    #
+    # === Parameters
+    #
+    # * <tt>source</tt> -- A string which specifies either the path of a Nifti file to be loaded, or a binary Nifti string to be parsed.
+    # * <tt>options</tt> -- A hash of parameters.
+    #
+    # === Options
+    #
+    # * <tt>:bin</tt> -- Boolean. If set to true, string parameter will be interpreted as a binary DICOM string, and not a path string, which is the default behaviour.
+    # * <tt>:narray</tt> -- Boolean.  If set to true, a properly shaped narray matrix will be set in the instance variable @image_narray
+    #
     def initialize(source=nil, options={})
+      @msg = []
       set_stream(source, options)
-      parse_header
+      parse_header(options)
     end
         
     private
@@ -51,12 +69,15 @@ module Nifti
     end
     
     # Parse the Nifti Header.
-    def parse_header
+    def parse_header(options = {})
       check_header
       @hdr = parse_basic_header(@stream)
       @hdr.merge parse_extended_header(@stream)
       read_image(@stream)
-      get_image_narray(@image, @hdr['dim'])
+      if options[:narray]
+        get_image_narray(@image_rubyarray, @hdr['dim'])
+      end
+      
       
       @success = true
     end
@@ -246,6 +267,13 @@ module Nifti
       # 
       # 
       
+      # Extract Freq, Phase & Slice Dimensions from diminfo
+      header['freq_dim'] = dim_info_to_freq_dim(header['dim_info'])
+      header['phase_dim'] = dim_info_to_phase_dim(header['dim_info'])
+      header['slice_dim'] = dim_info_to_slice_dim(header['dim_info'])
+      header['sform_code_descr'] = XFORM_CODES[header['sform_code']]
+      header['qform_code_descr'] = XFORM_CODES[header['qform_code']]
+            
       return header
     end
 
@@ -265,9 +293,7 @@ module Nifti
       stream.index = @hdr['vox_offset']
       type = @datatypes[@hdr['datatype']]
       format = stream.format[type]
-      @image = stream.decode(stream.rest_length, type)
-      raw_image.class
-      raw_image.length
+      @image_rubyarray = stream.decode(stream.rest_length, type)
     end
     
     # Take a Nifti TypeCode and return datatype and bitpix
@@ -344,8 +370,43 @@ module Nifti
     end
     
     def get_image_narray(image_array, dim)
-      rows, columns, slices = dim[1..3]
-      @image_narray = pixel_data = NArray.to_na(image_array).reshape!(slices, columns, rows)
+      if defined? NArray
+        @image_narray = pixel_data = NArray.to_na(image_array).reshape!(*dim[1..dim[0]])
+      else
+        add_msg "Can't find NArray, no image_narray created.  Please `gem install narray`"
+      end
+    end
+    
+    # Bitwise Operator to extract Frequency Dimension
+    def dim_info_to_freq_dim(dim_info)
+      extract_dim_info(dim_info, 0)
+    end
+    
+    # Bitwise Operator to extract Phase Dimension 
+    def dim_info_to_phase_dim(dim_info)
+      extract_dim_info(dim_info, 2)
+    end
+    
+    # Bitwise Operator to extract Slice Dimension
+    def dim_info_to_slice_dim(dim_info)
+      extract_dim_info(dim_info, 4)
+    end
+    
+    # Bitwise Operator to extract Frequency, Phase & Slice Dimensions from 2byte diminfo
+    def extract_dim_info(dim_info, offset = 0)
+      (dim_info >> offset) & 0x03
+    end
+    
+    # Bitwise Operator to encode Freq, Phase & Slice into Diminfo
+    def fps_into_dim_info(frequency_dim, phase_dim, slice_dim)
+      ((frequency_dim & 0x03 ) << 0 ) | 
+      ((phase_dim & 0x03) << 2 ) | 
+      ((slice_dim & 0x03) << 4 )
+    end
+    
+    def add_msg(msg)
+      @msg << msg
+      puts msg
     end
     
   end
