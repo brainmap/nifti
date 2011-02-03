@@ -1,6 +1,6 @@
 module Nifti
-
   # The NRead class parses the NIFTI data from a binary string.
+  # 
   class NRead
     # An array which records any status messages that are generated while parsing the DICOM string.
     attr_reader :msg
@@ -33,13 +33,51 @@ module Nifti
     #
     # === Options
     #
-    # * <tt>:bin</tt> -- Boolean. If set to true, string parameter will be interpreted as a binary DICOM string, and not a path string, which is the default behaviour.
-    # * <tt>:narray</tt> -- Boolean.  If set to true, a properly shaped narray matrix will be set in the instance variable @image_narray
+    # * <tt>:bin</tt> -- Boolean. If set to true, string parameter will be interpreted as a binary Nifti string, and not a path string, which is the default behaviour.
+    # * <tt>:image</tt> -- Boolean. If set to true, automatically load the image into @image, otherwise only a header is collected and you can get an image
+    # * <tt>:narray</tt> -- Boolean.  If set to true, a properly shaped narray matrix will be set in the instance variable @image_narray.  Automatically sets :image => true
     #
     def initialize(source=nil, options={})
-      @msg = [], @success = false
+      options[:image] = true if options[:narray]
+      @msg = []
+      @success = false
       set_stream(source, options)
       parse_header(options)
+      
+      return self
+    end
+    
+    # Unpack an image array from vox_offset to the end of a nifti file.
+    # 
+    # === Parameters
+    #
+    # There are no parameters - this reads from the binary string in the @string instance variable.
+    # 
+    # This sets @image_rubyarray to the image data vector and also returns it.
+    # 
+    def read_image
+      set_datatype
+      raw_image = []
+      @stream.index = @hdr['vox_offset']
+      type = @datatypes[@hdr['datatype']]
+      format = @stream.format[type]
+      @image_rubyarray = @stream.decode(@stream.rest_length, type)
+    end
+    
+    # Create an narray if the NArray is available 
+    # Tests if a file is readable, and if so, opens it.
+    #
+    # === Parameters
+    #
+    # * <tt>image_array</tt> -- Array. A vector of image data.
+    # * <tt>dim</tt> -- Array. The dim array from the nifti header, specifing number of dimensions (dim[0]) and dimension length of other dimensions to reshape narray into.
+    # 
+    def get_image_narray(image_array, dim)
+      if defined? NArray
+        @image_narray = pixel_data = NArray.to_na(image_array).reshape!(*dim[1..dim[0]])
+      else
+        add_msg "Can't find NArray, no image_narray created.  Please `gem install narray`"
+      end
     end
     
     private
@@ -75,10 +113,10 @@ module Nifti
       check_header
       @hdr = parse_basic_header
       @extended_header = parse_extended_header
-      read_image
-      if options[:narray]
-        get_image_narray(@image_rubyarray, @hdr['dim'])
-      end
+      
+      # Optional image gathering
+      read_image if options[:image] 
+      get_image_narray(@image_rubyarray, @hdr['dim']) if options[:narray]
       
       @success = true
     end
@@ -165,15 +203,8 @@ module Nifti
       return extended
     end
     
-    # Read an image array from the end of the nifti file.  Jumps straight to vox_offset irregardless of whether it's there or not.
-    def read_image
-      set_datatype
-      raw_image = []
-      @stream.index = @hdr['vox_offset']
-      type = @datatypes[@hdr['datatype']]
-      format = @stream.format[type]
-      @image_rubyarray = @stream.decode(@stream.rest_length, type)
-    end
+
+    
     
     # Take a Nifti TypeCode and return datatype and bitpix
     def set_datatype
@@ -247,15 +278,7 @@ module Nifti
         @msg << "Error! The file you have supplied does not exist (#{file})."
       end
     end
-    
-    def get_image_narray(image_array, dim)
-      if defined? NArray
-        @image_narray = pixel_data = NArray.to_na(image_array).reshape!(*dim[1..dim[0]])
-      else
-        add_msg "Can't find NArray, no image_narray created.  Please `gem install narray`"
-      end
-    end
-    
+        
     # Bitwise Operator to extract Frequency Dimension
     def dim_info_to_freq_dim(dim_info)
       extract_dim_info(dim_info, 0)
@@ -283,9 +306,9 @@ module Nifti
       ((slice_dim & 0x03) << 4 )
     end
     
+    # Add a message (TODO: and maybe print to screen if verbose)
     def add_msg(msg)
       @msg << msg
-      puts msg
     end
     
   end

@@ -12,7 +12,7 @@ module Nifti
     attr_reader :str_endian
     # An array of warning/error messages that (may) have been accumulated.
     attr_reader :errors
-    # 
+    # A hash of proper strings (based on endianess) to use for unpacking binary strings.
     attr_reader :format
     
     # Creates a Stream instance.

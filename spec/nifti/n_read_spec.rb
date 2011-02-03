@@ -2,11 +2,10 @@ require 'spec_helper'
 
 describe Nifti::NRead do
   before :all do
-    @file = File.open(NIFTI_TEST_FILE1, 'rb')
+    @string = File.open(NIFTI_TEST_FILE1, 'rb').read
+    @stream = Stream.new(@string, false)
     @fixture_image_length = 983040
     @fixture_afni_extension_length = 5660
-    @string = @file.read
-    @stream = Stream.new(@string, false)
     @valid_header = {
       "xyzt_units"=>2, "pixdim"=>[1.0, 0.9375, 0.9375, 12.5, 0.0, 0.0, 0.0,
       0.0], "sform_code"=>1, "aux_file"=>"", "scl_slope"=>0.0,
@@ -53,13 +52,14 @@ describe Nifti::NRead do
     }.should raise_error IOError, /Header appears to be malformed/
   end
   
-  it "should read image data correctly" do
-    @n_read_obj.image_rubyarray.class.should == Array
-    @n_read_obj.image_rubyarray.length.should == @fixture_image_length
+  it "should read image data correctly if :image option is true" do
+    obj = NRead.new(@string, :bin => true, :image => true)
+    obj.image_rubyarray.class.should == Array
+    obj.image_rubyarray.length.should == @fixture_image_length
     # Since this is a fixture, we know exactly what the values are.
     # Pick some from the middle of the string and test them.
-    @n_read_obj.image_rubyarray[(@fixture_image_length / 2)..(@fixture_image_length/2 + 100)].should == [0, 0, 0, 0, 18, 36, 25, 23, 19, 23, 13, 14, 16, 16, 12, 16, 22, 17, 13, 17, 19, 24, 19, 14, 11, 16, 49, 81, 129, 194, 216, 175, 130, 128, 146, 154, 159, 205, 304, 391, 414, 380, 320, 281, 297, 343, 358, 322, 287, 339, 450, 493, 426, 344, 310, 285, 275, 290, 282, 283, 310, 278, 268, 222, 49, 284, 235, 172, 116, 108, 115, 112, 135, 176, 196, 200, 216, 207, 86, 30, 152, 161, 138, 117, 81, 47, 73, 207, 381, 459, 415, 346, 353, 429, 490, 503, 492, 454, 379, 304, 275]
-    @n_read_obj.image_narray.should be_nil
+    obj.image_rubyarray[(@fixture_image_length / 2)..(@fixture_image_length/2 + 100)].should == [0, 0, 0, 0, 18, 36, 25, 23, 19, 23, 13, 14, 16, 16, 12, 16, 22, 17, 13, 17, 19, 24, 19, 14, 11, 16, 49, 81, 129, 194, 216, 175, 130, 128, 146, 154, 159, 205, 304, 391, 414, 380, 320, 281, 297, 343, 358, 322, 287, 339, 450, 493, 426, 344, 310, 285, 275, 290, 282, 283, 310, 278, 268, 222, 49, 284, 235, 172, 116, 108, 115, 112, 135, 176, 196, 200, 216, 207, 86, 30, 152, 161, 138, 117, 81, 47, 73, 207, 381, 459, 415, 346, 353, 429, 490, 503, 492, 454, 379, 304, 275]
+    obj.image_narray.should be_nil
   end
   
   it "should return an narray if requested" do
