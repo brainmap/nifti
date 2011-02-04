@@ -79,11 +79,23 @@ describe Nifti::NRead do
     
   end
   
+  it "should retrieve image data when requested" do
+    obj = NObject.new(NIFTI_TEST_FILE1)
+    obj.get_image.length.should == @fixture_image_length
+  end
+  
   
   it "should raise an error if initialized with bad argument" do
     lambda {
       NObject.new(12345)
     }.should raise_error ArgumentError, /Invalid argument/
+  end
+  
+  it "should sucessfully write a NIfTI file" do
+    obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
+    filename = "4PlLoc.nii"
+    obj.write(filename)
+    File.exist?(filename).should be_true
   end
 
 end

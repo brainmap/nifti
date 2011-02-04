@@ -8,6 +8,7 @@ $: << File.dirname(__FILE__)
 # Core library:
 require 'nifti/n_object'
 require 'nifti/n_read'
+require 'nifti/n_write'
 require 'nifti/stream'
 require 'nifti/constants'
 

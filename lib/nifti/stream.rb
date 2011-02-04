@@ -14,6 +14,8 @@ module Nifti
     attr_reader :errors
     # A hash of proper strings (based on endianess) to use for unpacking binary strings.
     attr_reader :format
+    # A File object to write to
+    attr_accessor :file
     
     # Creates a Stream instance.
     #
@@ -159,7 +161,63 @@ module Nifti
       end
     end
     
-    # # Following methods are private:
+    # Sets an instance file variable.
+    #
+    # === Notes
+    #
+    # For performance reasons, we enable the Stream instance to write directly to file,
+    # to avoid expensive string operations which will otherwise slow down the write performance.
+    #
+    # === Parameters
+    #
+    # * <tt>file</tt> -- A File instance.
+    #
+    def set_file(file)
+      @file = file
+    end
+    
+    # Writes a binary string to the File instance.
+    #
+    # === Parameters
+    #
+    # * <tt>binary</tt> -- A binary string.
+    #
+    def write(binary)
+      @file.write(binary)
+    end
+    
+    # Encodes a value and returns the resulting binary string.
+    #
+    # === Parameters
+    #
+    # * <tt>value</tt> -- A custom value (String, Fixnum, etc..) or an array of numbers.
+    # * <tt>type</tt> -- String. The type (vr) of data to encode.
+    #
+    def encode(value, type)
+      value = [value] unless value.is_a?(Array)
+      return value.pack(vr_to_str(type))
+    end
+    
+    # Appends a string with trailling spaces to achieve a target length, and encodes it to a binary string.
+    # Returns the binary string.
+    #
+    # === Parameters
+    #
+    # * <tt>string</tt> -- A string to be processed.
+    # * <tt>target_length</tt> -- Fixnum. The target length of the string that is created.
+    #
+    def encode_string_with_trailing_spaces(string, target_length)
+      length = string.length
+      if length < target_length
+        return [string].pack(@str)+["20"*(target_length-length)].pack(@hex)
+      elsif length == target_length
+        return [string].pack(@str)
+      else
+        raise "The specified string is longer than the allowed maximum length (String: #{string}, Target length: #{target_length})."
+      end
+    end
+    
+    # Following methods are private:
     private
 
 
@@ -242,18 +300,44 @@ module Nifti
         "STR" => @str
       }
     end
-  
-    # Encodes a value and returns the resulting binary string.
+    
+    # Sets the hash which is used to keep track of which bytes to use for padding
+    # data elements of various vr which have an odd value length.
     #
-    # === Parameters
-    #
-    # * <tt>value</tt> -- A custom value (String, Fixnum, etc..) or an array of numbers.
-    # * <tt>type</tt> -- String. The type (vr) of data to encode.
-    #
-    def encode(value, type)
-      value = [value] unless value.is_a?(Array)
-      return value.pack(vr_to_str(type))
+    def set_pad_byte
+      @pad_byte = {
+        # Space character:
+        "AE" => "\x20",
+        "AS" => "\x20",
+        "CS" => "\x20",
+        "DA" => "\x20",
+        "DS" => "\x20",
+        "DT" => "\x20",
+        "IS" => "\x20",
+        "LO" => "\x20",
+        "LT" => "\x20",
+        "PN" => "\x20",
+        "SH" => "\x20",
+        "ST" => "\x20",
+        "TM" => "\x20",
+        "UT" => "\x20",
+        # Zero byte:
+        "AT" => "\x00",
+        "FL" => "\x00",
+        "FD" => "\x00",
+        "OB" => "\x00",
+        "OF" => "\x00",
+        "OW" => "\x00",
+        "SL" => "\x00",
+        "SQ" => "\x00",
+        "SS" => "\x00",
+        "UI" => "\x00",
+        "UL" => "\x00",
+        "UN" => "\x00",
+        "US" => "\x00"
+      }
     end
+
 
     # Sets the endianness of the instance string. The relationship between the string endianness and
     # the system endianness, determines which encoding/decoding flags to use.
@@ -267,6 +351,7 @@ module Nifti
       configure_endian
       set_string_formats
       set_format_hash
+      set_pad_byte
     end
 
   end

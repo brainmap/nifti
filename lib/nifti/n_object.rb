@@ -68,6 +68,41 @@ module Nifti
       
     end
     
+    # Reopen the Nifti File and retrieve image data
+    def get_image
+      r = NRead.new(@string, :image => true)
+      if r.success
+        @image = r.image_rubyarray
+      end
+    end
+    
+    # Passes the NObject to the DWrite class, which writes out the header and image to the specified file.
+    #
+    # === Parameters
+    #
+    # * <tt>file_name</tt> -- A string which identifies the path & name of the NIfTI file which is to be written to disk.
+    # * <tt>options</tt> -- A hash of parameters.
+    #
+    # === Options
+    #
+    # === Examples
+    #
+    #   obj.write(path + "test.dcm")
+    #
+    def write(file_name, options={})
+      if file_name.is_a?(String)
+        w = NWrite.new(self, file_name, options)
+        w.write
+        # Write process succesful?
+        @write_success = w.success
+        # If any messages has been recorded, send these to the message handling method:
+        add_msg(w.msg) if w.msg.length > 0
+      else
+        raise ArgumentError, "Invalid file_name. Expected String, got #{file_name.class}."
+      end
+    end
+    
+    # Following methods are private:
     private 
     
     # Returns a Nifti object by reading and parsing the specified file.
@@ -80,6 +115,7 @@ module Nifti
     # 
     def read(string, options={})
       if string.is_a?(String)
+        @string = string
         r = NRead.new(string, options)
         # Store the data to the instance variables if the readout was a success:
         if r.success
@@ -101,10 +137,6 @@ module Nifti
         raise ArgumentError, "Invalid argument. Expected String, got #{string.class}."
       end
     end
-    
-    # Following methods are private:
-    private
-
 
     # Adds one or more status messages to the instance array holding messages, and if the verbose instance variable
     # is true, the status message(s) are printed to the screen as well.

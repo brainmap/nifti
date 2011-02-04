@@ -1,0 +1,89 @@
+= RUBY NIFTI
+
+Ruby NIFTI is a pure-ruby library for handling NIfTI data in Ruby. NIfTI
+[(Neuroimaging Informatics Technology Initiative)](http://nifti.nimh.nih.gov/)
+is an image format designed primarily for storing and analyzing MRI & PET
+imaging data.
+
+Ruby NIfTI currently only supports reading NIfTI files, including basic and
+extended header information. It doesn't attempt to touch the image data
+(rotate it, etc.) and is still very much in its infancy. Nonetheless it does
+provide a nice interface to get at NIfTI info from within ruby. Since Ruby
+isn't as widely known as a quantitative scripting language yet (Python is more
+well known, and PyNifti is more mature than NumericalRuby / NArray) I don't
+know how widely this will be used, but hopefully it will be useful for
+somebody.
+
+== INSTALLATION
+
+  gem install nifti
+
+
+== BASIC USAGE
+
+  require "nifti"
+  # Read file:
+  obj = Nifti::NObject.new("some_file.nii")
+  # Display some key information about the file:
+  obj.header
+  # Retrieve the pixel data in a Ruby Array:
+  image = obj.get_image
+  # Load the pixel data to an NArray image object and display it on the screen:
+  image = obj.get_image_narray
+
+== LIMITATIONS
+
+There are plenty of Nifti libraries around (the canonical
+[nifticlib](http://niftilib.sourceforge.net/), which includes c, python and
+matlab interfaces, and matlab interfaces in the Mathworks image processing
+toolbox and [Toolbox for
+Nifti](http://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image)
+by Jimmy Shen. 
+
+This library is not intending to replace them, but rather to provide a few
+pure ruby convenience methods for quickly getting into imaging data from ruby
+without having to call out to external programs. At current, it doesn't do
+much more than byte parsing and providing access to the header. However,
+[narray](http://narray.rubyforge.org/) is picking up and its possible that
+people would want to have some convenience methods if they have existing ruby
+programs.
+
+== CREDIT
+
+Ruby NIfTI is highly derivative of the wonderful library [Ruby
+DICOM](http://dicom.rubyforge.org/), from which all of the design and most of
+the code has been cold-heartedly stolen. Many thanks to Chris Lervag - this
+wouldn't exist without his examples.
+
+== RESOURCES
+
+* {Official home page}[http://dicom.rubyforge.org/]
+* {Discussion forum}[http://groups.google.com/group/ruby-dicom]
+* {Source code repository}[https://github.com/dicom/ruby-dicom]
+
+
+== COPYRIGHT
+
+Copyright 2011 Erik Kastman
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see http://www.gnu.org/licenses/ .
+
+
+== ABOUT ME
+
+* Name: Erik Kastman
+* Location: Madison, Wisconsin, USA
+* Email: ekk [@nospam.com] @medicine.wisc.edu
+
+Please don't hesitate to email me if you have any thoughts about this project!
