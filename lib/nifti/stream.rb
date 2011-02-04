@@ -199,17 +199,26 @@ module Nifti
     end
     
     # Appends a string with trailling spaces to achieve a target length, and encodes it to a binary string.
-    # Returns the binary string.
+    # Returns the binary string.  Raises an error if pad option is different than :null or :spaces
     #
     # === Parameters
     #
     # * <tt>string</tt> -- A string to be processed.
     # * <tt>target_length</tt> -- Fixnum. The target length of the string that is created.
+    # * <tt>pad</tt> -- Type of desired padding, either :null or :spaces
     #
-    def encode_string_with_trailing_spaces(string, target_length)
+    def encode_string_to_length(string, target_length, pad = :null)
+      if pad == :spaces
+        template = "A#{target_length}"
+      elsif pad == :null
+        template = "a#{target_length}"
+      else
+        raise StandardError, "Could not identify padding type #{pad}"
+      end
+      
       length = string.length
       if length < target_length
-        return [string].pack(@str)+["20"*(target_length-length)].pack(@hex)
+        return [string].pack(template)
       elsif length == target_length
         return [string].pack(@str)
       else
@@ -336,6 +345,7 @@ module Nifti
         "UN" => "\x00",
         "US" => "\x00"
       }
+      @pad_byte.default = "\20"
     end
 
 

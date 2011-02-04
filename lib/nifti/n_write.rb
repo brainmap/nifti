@@ -59,11 +59,19 @@ module Nifti
     # Write Basic Header
     def write_basic_header
       HEADER_SIGNATURE.each do |header_item|
-        name, length, type = *header_item
-        value = @obj.header[name]
-        str = @stream.encode(value, type)
-        padded_str = @stream.encode_string_with_trailing_spaces(str, length)
-        @stream.write padded_str
+        begin
+          name, length, type = *header_item
+          str = @stream.encode(@obj.header[name], type)
+          padded_str = @stream.encode_string_to_length(str, length)
+          # puts @stream.index, name, str.unpack(@stream.vr_to_str(type))
+          # pp padded_str.unpack(@stream.vr_to_str(type))
+
+          @stream.write padded_str
+          @stream.skip length
+        rescue StandardError => e
+          puts name, length, type, e
+          raise e
+        end
       end
     end
     
@@ -74,7 +82,7 @@ module Nifti
         @obj.extended_header.each do |extension|
         @stream.write @stream.encode extension[:esize], "UL"
         @stream.write @stream.encode extension[:ecode], "UL"
-        @stream.write @stream.encode_string_with_trailing_spaces(@stream.encode(extension[:data], "STR"), extension[:esize] - 8)
+        @stream.write @stream.encode_string_to_length(@stream.encode(extension[:data], "STR"), extension[:esize] - 8)
         end
       else
         @stream.write @stream.encode([0,0,0,0], "BY")

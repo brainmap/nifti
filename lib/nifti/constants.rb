@@ -77,7 +77,7 @@ module Nifti
     # struct nifti_1_header {  /* NIFTI-1 usage      */    /*ANALYZE 7.5 field(s)*/     /* Byte offset */
     #                         /**********************/    /**********************/     /***************/
     #  int   sizeof_hdr;    /*!< MUST be 348           */  /* int sizeof_hdr;      */   /*   0 */
-    ['sizeof_hdr', 4, 'UL'],
+    ['sizeof_hdr', 4, 'SL'],
   
     #  char  data_type[10]; /*!< ++UNUSED++            */  /* char data_type[10];  */   /*   4 */
     ['data_type', 10, 'STR'],
@@ -86,10 +86,10 @@ module Nifti
     ['db_name', 18, 'STR'],
   
     #  int   extents;       /*!< ++UNUSED++            */  /* int extents;         */   /*  32 */
-    ['extents', 4, "UL"],
+    ['extents', 4, "SL"],
 
     #  short session_error; /*!< ++UNUSED++            */  /* short session_error; */   /*  36 */
-    ['session_error', 2, "US"],
+    ['session_error', 2, "SS"],
 
     #  char  regular;       /*!< ++UNUSED++            */  /* char regular;        */   /*  38 */
     ['regular', 1, "STR"],
