@@ -1,4 +1,4 @@
-module Nifti
+module NIFTI
   # The Stream class handles string operations (encoding to and decoding from binary strings).
   #  
   class Stream

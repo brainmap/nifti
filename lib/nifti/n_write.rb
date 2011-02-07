@@ -1,6 +1,6 @@
-module Nifti
+module NIFTI
 
-  # The NWrite class handles the encoding of an NObject instance to a valid Nifti string.
+  # The NWrite class handles the encoding of an NObject instance to a valid NIFTI string.
   # The String is then written to file.
   #
   class NWrite

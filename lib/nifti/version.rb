@@ -1,4 +1,4 @@
-module Nifti
-  # Current Version of Nifti
+module NIFTI
+  # Current Version of NIFTI
   VERSION = "0.0.1"
 end

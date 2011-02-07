@@ -1,10 +1,10 @@
-module Nifti
+module NIFTI
   # The NRead class parses the NIFTI data from a binary string.
   # 
   class NRead
     # An array which records any status messages that are generated while parsing the DICOM string.
     attr_reader :msg
-    # A boolean which reports whether the Nifti string was parsed successfully (true) or not (false).
+    # A boolean which reports whether the NIFTI string was parsed successfully (true) or not (false).
     attr_reader :success
     # A hash containing header attributes.
     attr_reader :hdr
@@ -15,25 +15,25 @@ module Nifti
     # A narray of image values reshapred to image dimensions
     attr_reader :image_narray
     
-    # Valid Magic codes for the Nifti Header
+    # Valid Magic codes for the NIFTI Header
     MAGIC = %w{ni1 n+1}
     
     # Create a NRead object to parse a nifti file or binary string and set header and image info instance variables.
     #
     # The nifti header will be checked for validity (header size and magic number) and will raise an IOError if invalid.
     # 
-    # Nifti header extensions are not yet supported and are not included in the header.
+    # NIFTI header extensions are not yet supported and are not included in the header.
     #
     # The header and image are accessible via the hdr and image instance variables.  An optional narray matrix may also be available in image_narray if desired by passing in :narray => true as an option.
     #
     # === Parameters
     #
-    # * <tt>source</tt> -- A string which specifies either the path of a Nifti file to be loaded, or a binary Nifti string to be parsed.
+    # * <tt>source</tt> -- A string which specifies either the path of a NIFTI file to be loaded, or a binary NIFTI string to be parsed.
     # * <tt>options</tt> -- A hash of parameters.
     #
     # === Options
     #
-    # * <tt>:bin</tt> -- Boolean. If set to true, string parameter will be interpreted as a binary Nifti string, and not a path string, which is the default behaviour.
+    # * <tt>:bin</tt> -- Boolean. If set to true, string parameter will be interpreted as a binary NIFTI string, and not a path string, which is the default behaviour.
     # * <tt>:image</tt> -- Boolean. If set to true, automatically load the image into @image, otherwise only a header is collected and you can get an image
     # * <tt>:narray</tt> -- Boolean.  If set to true, a properly shaped narray matrix will be set in the instance variable @image_narray.  Automatically sets :image => true
     #
@@ -107,7 +107,7 @@ module Nifti
       @stream = Stream.new(@str, false)
     end
     
-    # Parse the Nifti Header.
+    # Parse the NIFTI Header.
     def parse_header(options = {})
       check_header
       @hdr = parse_basic_header
@@ -120,7 +120,7 @@ module Nifti
       @success = true
     end
     
-    # Nifti uses the header length (first 4 bytes) to be 348 number of "ni1\0"
+    # NIFTI uses the header length (first 4 bytes) to be 348 number of "ni1\0"
     # or "n+1\0" as the last 4 bytes to be magic numbers to validate the header.
     # 
     # The header is usually checked before any data is read, but can be
@@ -153,7 +153,7 @@ module Nifti
     # Read the nifti header according to its byte signature.
     # The file stream will be left open and should be positioned at the end of the 348 byte header. 
     def parse_basic_header
-      # The HEADER_SIGNATURE is defined in Nifti::Constants and used for both reading and writing.
+      # The HEADER_SIGNATURE is defined in NIFTI::Constants and used for both reading and writing.
       header = {}
       HEADER_SIGNATURE.each do |header_item| 
         name, length, type = *header_item
@@ -173,7 +173,7 @@ module Nifti
     end
 
     # Read any extended header information.
-    # The file stream will be left at imaging data itself, taking vox_offset into account for Nifti Header Extended Attributes.
+    # The file stream will be left at imaging data itself, taking vox_offset into account for NIFTI Header Extended Attributes.
     # Pass in the voxel offset so the extended header knows when to stop reading.
 
     def parse_extended_header

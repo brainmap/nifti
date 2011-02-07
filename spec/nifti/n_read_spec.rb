@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Nifti::NRead do
+describe NIFTI::NRead do
   before :all do
     @string = File.open(NIFTI_TEST_FILE1, 'rb').read
     @stream = Stream.new(@string, false)

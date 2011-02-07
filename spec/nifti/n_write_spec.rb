@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Nifti::NWrite do
+describe NIFTI::NWrite do
   before :all do
     @n_object = NObject.new(NIFTI_TEST_FILE1)
     @new_fixture_file_name = '5PlLoc.nii'
@@ -28,16 +28,26 @@ describe Nifti::NWrite do
   end
   
   it "should write a NIfTI file" do
-    nobj = NObject.new(NIFTI_TEST_FILE1, :image => true)
-    w = NWrite.new(nobj, @new_fixture_file_name)
+    obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
+    w = NWrite.new(obj, @new_fixture_file_name)
     w.write
+    w.msg.should be_empty
+    File.exist? @new_fixture_file_name.should be_true
   end
   
   it "should write back an identical file if no changes were made" do
-    nobj = NObject.new(NIFTI_TEST_FILE1, :image => true)
-    w = NWrite.new(nobj, @new_fixture_file_name)
+    obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
+    w = NWrite.new(obj, @new_fixture_file_name)
     w.write
     @new_fixture_file_name.should be_same_file_as NIFTI_TEST_FILE1
+  end
+  
+  it "should write a new image after changing some variables" do
+    obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
+    obj.header['qoffset_x'] = obj.header['qoffset_x'] + 1
+    w = NWrite.new(obj, @new_fixture_file_name)
+    w.write
+    @new_fixture_file_name.should_not be_same_file_as NIFTI_TEST_FILE1
   end
   
   after :each do

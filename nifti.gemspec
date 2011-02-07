@@ -4,7 +4,7 @@ require "nifti/version"
 
 Gem::Specification.new do |s|
   s.name        = "nifti"
-  s.version     = Nifti::VERSION
+  s.version     = NIFTI::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Erik Kastman"]
   s.email       = ["ekk@medicine.wisc.edu"]

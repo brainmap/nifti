@@ -10,3 +10,4 @@ Known issues:
 * Only tested with little-endian, signed short, 3d and 4d images.
 * No interfaces for viewing image data (qt, NImage, etc.).  The easiest way right now is to save out the nifti and then use another image viewing program.
 * Only supports .nii (n+1) single image files, not a split .img/.hdr
+* Vox_offset is not being updated during writing, so this will cause a problem if image length or extended header length is updated.

@@ -1,11 +1,11 @@
-module Nifti
-  # The NObject class is the main class for interacting with the Nifti object.
+module NIFTI
+  # The NObject class is the main class for interacting with the NIFTI object.
   # Reading from and writing to files is executed from instances of this class.
   # 
   class NObject
     # An array which contain any notices/warnings/errors that have been recorded for the NObject instance.
     attr_reader :errors
-    # A boolean which is set as true if a Nifti file has been successfully read & parsed from a file (or binary string).
+    # A boolean which is set as true if a NIFTI file has been successfully read & parsed from a file (or binary string).
     attr_reader :read_success
     # The Stream instance associated with this DObject instance (this attribute is mostly used internally).
     attr_reader :stream
@@ -18,9 +18,9 @@ module Nifti
     # An array or narray of image values
     attr_accessor :image
 
-    # Creates an NObject instance (NObject is an abbreviation for "Nifti object").
+    # Creates an NObject instance (NObject is an abbreviation for "NIFTI object").
     #
-    # The NObject instance holds references to the Nifti Header and Image
+    # The NObject instance holds references to the NIFTI Header and Image
     # A NObject is typically built by reading and parsing a file or a
     # binary string, but can also be built from an empty state by the user.
     #
@@ -39,13 +39,13 @@ module Nifti
     #
     # === Examples
     #
-    #   # Load a Nifti file's header information:
+    #   # Load a NIFTI file's header information:
     #   require 'nifti'
-    #   obj = Nifti::NObject.new("test.nii")
-    #   # Read a Nifti header and image into a numerical-ruby narray:
+    #   obj = NIFTI::NObject.new("test.nii")
+    #   # Read a NIFTI header and image into a numerical-ruby narray:
     #   obj = Nfiti::NObject.new("test.nii", :image => true, :narray => true)
     #   # Create an empty NIfTI object & choose non-verbose behaviour:
-    #   obj = Nifti::NObject.new(nil, :verbose => false)
+    #   obj = NIFTI::NObject.new(nil, :verbose => false)
     #
     def initialize(string=nil, options={})
       # Process option values, setting defaults for the ones that are not specified:
@@ -68,7 +68,7 @@ module Nifti
       
     end
     
-    # Reopen the Nifti File and retrieve image data
+    # Reopen the NIFTI File and retrieve image data
     def get_image
       r = NRead.new(@string, :image => true)
       if r.success
@@ -105,8 +105,8 @@ module Nifti
     # Following methods are private:
     private 
     
-    # Returns a Nifti object by reading and parsing the specified file.
-    # This is accomplished by initializing the NRead class, which loads Nifti information.
+    # Returns a NIFTI object by reading and parsing the specified file.
+    # This is accomplished by initializing the NRead class, which loads NIFTI information.
     #
     # === Notes
     #

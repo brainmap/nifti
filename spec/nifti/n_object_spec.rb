@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Nifti::NObject do
+describe NIFTI::NObject do
   before :all do
     @string = File.open(NIFTI_TEST_FILE1, 'rb').read
     @fixture_image_length = 983040
@@ -96,6 +96,7 @@ describe Nifti::NObject do
     obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
     obj.write(@new_fixture_file_name)
     File.exist?(@new_fixture_file_name).should be_true
+    obj.write_success.should be_true
   end
   
   it "should be able to assign an image" do 

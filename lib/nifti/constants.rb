@@ -1,4 +1,4 @@
-module Nifti
+module NIFTI
   # Variables used to determine endianness.
   x = 0xdeadbeef
   endian_type = {
@@ -23,7 +23,7 @@ module Nifti
     4 => 'NIFTI_XFORM_MNI_152'        # MNI 152 normalized coordinates
   }
 
-    # Take a Nifti TypeCode and return datatype and bitpix
+    # Take a NIFTI TypeCode and return datatype and bitpix
     # 
     # From Jimmy Shen: 
     # Set bitpix according to datatype
@@ -68,7 +68,7 @@ module Nifti
    # 2048 => ""
   }
 
-  # The Nifti signature is hardcoded by bytes. This consists of arrays for 
+  # The NIFTI signature is hardcoded by bytes. This consists of arrays for 
   # each item in the signature, where item[0] is the name of the item,
   # item[1] is the length in bytes of the item, and dim[2] is the Format
   # string to use in packing/unpacking the item.

@@ -1,12 +1,12 @@
 $: << File.dirname(__FILE__)
 
-# Loads the files that are used by Ruby Nifti.
+# Loads the files that are used by Ruby NIFTI.
 #
 # The following classes are meant to be used by users of Ruby DICOM:
 # * NObject - for reading, manipulating and writing DICOM files.
 
-# Nifti is the main namespace for all Ruby NIfTI classes, constants and methods.
-module Nifti; end
+# NIFTI is the main namespace for all Ruby NIfTI classes, constants and methods.
+module NIFTI; end
 
 # Core library:
 require 'nifti/n_object'

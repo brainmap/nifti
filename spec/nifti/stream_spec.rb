@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Nifti::Stream do
+describe NIFTI::Stream do
   before :each do
     @string = File.open(NIFTI_TEST_FILE1, 'rb').read
     @endianess = false
