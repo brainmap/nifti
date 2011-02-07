@@ -7,8 +7,6 @@ module NIFTI
 
     # An array which records any status messages that are generated while encoding/writing the DICOM string.
     attr_reader :msg
-    # An array of partial DICOM strings.
-    attr_reader :segments
     # A boolean which reports whether the DICOM string was encoded/written successfully (true) or not (false).
     attr_reader :success
     
