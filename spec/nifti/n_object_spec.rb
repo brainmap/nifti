@@ -1,10 +1,11 @@
 require 'spec_helper'
 
-describe Nifti::NRead do
+describe Nifti::NObject do
   before :all do
     @string = File.open(NIFTI_TEST_FILE1, 'rb').read
     @fixture_image_length = 983040
-    @fixture_afni_extension_length = 5660
+    @fixture_afni_extension_length = 5661
+    @new_fixture_file_name = '5PlLoc.nii'
     @valid_header = {
       "xyzt_units"=>2, "pixdim"=>[1.0, 0.9375, 0.9375, 12.5, 0.0, 0.0, 0.0,
       0.0], "sform_code"=>1, "aux_file"=>"", "scl_slope"=>0.0,
@@ -93,9 +94,12 @@ describe Nifti::NRead do
   
   it "should sucessfully write a NIfTI file" do
     obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
-    filename = "4PlLoc.nii"
-    obj.write(filename)
-    File.exist?(filename).should be_true
+    obj.write(@new_fixture_file_name)
+    File.exist?(@new_fixture_file_name).should be_true
+  end
+  
+  after :each do
+    File.delete @new_fixture_file_name if File.exist? @new_fixture_file_name
   end
 
 end

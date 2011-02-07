@@ -1,4 +1,6 @@
 require File.dirname(__FILE__) + '/../lib/nifti'
+require 'custom_matchers'
+
 include Nifti
 
 module Nifti

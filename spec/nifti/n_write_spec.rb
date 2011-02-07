@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-describe Nifti::NRead do
+describe Nifti::NWrite do
   before :all do
     @n_object = NObject.new(NIFTI_TEST_FILE1)
     @new_fixture_file_name = '5PlLoc.nii'
     @fixture_image_length = 983040
-    @fixture_afni_extension_length = 5660
+    @fixture_afni_extension_length = 5661
     @valid_header = {
       "xyzt_units"=>2, "pixdim"=>[1.0, 0.9375, 0.9375, 12.5, 0.0, 0.0, 0.0,
       0.0], "sform_code"=>1, "aux_file"=>"", "scl_slope"=>0.0,
@@ -31,5 +31,16 @@ describe Nifti::NRead do
     nobj = NObject.new(NIFTI_TEST_FILE1, :image => true)
     w = NWrite.new(nobj, @new_fixture_file_name)
     w.write
+  end
+  
+  it "should write back an identical file if no changes were made" do
+    nobj = NObject.new(NIFTI_TEST_FILE1, :image => true)
+    w = NWrite.new(nobj, @new_fixture_file_name)
+    w.write
+    @new_fixture_file_name.should be_same_file_as NIFTI_TEST_FILE1
+  end
+  
+  after :each do
+    File.delete @new_fixture_file_name if File.exist? @new_fixture_file_name
   end
 end

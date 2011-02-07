@@ -26,7 +26,7 @@ describe Nifti::Stream do
     @stream.decode(4, "UL").should == 348
   end
   
-  it "should read the datatype as something" do
+  it "unused Analyze header datatype field should be blank" do
     @stream.skip 4
     @stream.decode(10, "STR").should == ""
   end

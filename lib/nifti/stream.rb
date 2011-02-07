@@ -67,7 +67,11 @@ module Nifti
           if value.length == 1
             value = value[0]
             # If value is a string, strip away possible trailing whitespace:
-            value = value.rstrip if value.is_a?(String)
+            # Do this using gsub instead of ruby-core #strip to keep trailing carriage
+            # returns, etc., because that is valid whitespace that we want to have included
+            # (i.e. in extended header data, AFNI writes a \n at the end of it's xml info, 
+            # and that must be kept in order to not change the file on writing back out).
+            value.gsub!(/\000*$/, "") if value.respond_to? :gsub!
           end
           # Update our position in the string:
           skip(length)
