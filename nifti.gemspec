@@ -9,8 +9,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Erik Kastman"]
   s.email       = ["ekk@medicine.wisc.edu"]
   s.homepage    = ""
-  s.summary     = %q{A pure Ruby API to the NiFtI Neuroimaging Format}
-  s.description = %q{A pure Ruby API to the NiFtI Neuroimaging Format}
+  s.summary     = %q{A pure Ruby API to the NIfTI Neuroimaging Format}
+  s.description = %q{A pure Ruby API to the NIfTI Neuroimaging Format}
 
   s.rubyforge_project = "nifti"
 
