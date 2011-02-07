@@ -1,4 +1,5 @@
-= RUBY NIfTI
+RUBY NIfTI
+==========
 
 Ruby NIfTI is a pure-ruby library for handling NIfTI data in Ruby. NIfTI
 [(Neuroimaging Informatics Technology Initiative)](http://nifti.nimh.nih.gov/)
@@ -14,12 +15,14 @@ widely seen as a quantitative scripting language yet (Python is more well
 known, and PyNifti is more mature than NumericalRuby / NArray) I don't know
 how widely this will be used, but hopefully it will be useful for somebody.
 
-== INSTALLATION
+INSTALLATION
+------------
 
   gem install nifti
 
 
-== BASIC USAGE
+BASIC USAGE
+-----------
 
   require "nifti"
   # Read file:
@@ -32,7 +35,8 @@ how widely this will be used, but hopefully it will be useful for somebody.
   # Load the pixel data to an NArray image object and display it on the screen:
   image = obj.get_image_narray
 
-== LIMITATIONS
+LIMITATIONS
+-----------
 
 There are plenty of NIfTI libraries around (the canonical
 [nifticlib](http://niftilib.sourceforge.net/), which includes c, python and
@@ -51,7 +55,8 @@ its possible that people would want to have some easy way to access NIfTI info
 using custom ruby libraries.
 
 
-== CREDIT
+CREDIT
+------
 
 Ruby NIfTI is highly derivative of the very good library [Ruby
 DICOM](http://dicom.rubyforge.org/), from which all of the design and most of
@@ -59,10 +64,12 @@ the code has been cold-heartedly stolen. Many thanks to Chris Lervag - this
 wouldn't exist without his examples.
 
 
-== RESOURCES
+RESOURCES
+---------
 
-* {Official home page}[http://brainmap.wisc.edu/pages]
-* {Source code repository}[https://github.com/brainmap/ruby-nifti]
+* [Official home page](http://brainmap.wisc.edu/pages)
+* [Development / Source code repository](https://github.com/brainmap/ruby-nifti)
+* [Documentation](http://rdoc.info/github/brainmap/ruby-nifti/master/frames)
 
 
 == EXAMPLES
@@ -99,7 +106,7 @@ If you don't have narray installed, you could still use obj.image as a ruby
 array, but you'd have to collect the summary stats yourself.
 
 
-== COPYRIGHT
+== COPYRIGHT 2011 Erik Kastman
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -113,12 +120,3 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/ .
-
-
-== ABOUT ME
-
-* Name: Erik Kastman
-* Location: Madison, Wisconsin, USA
-* Email: ekk [@nospam.com] @medicine.wisc.edu
-
-Please don't hesitate to email me if you have any thoughts about this project!
