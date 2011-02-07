@@ -18,22 +18,22 @@ how widely this will be used, but hopefully it will be useful for somebody.
 INSTALLATION
 ------------
 
-  gem install nifti
+    gem install nifti
 
 
 BASIC USAGE
 -----------
 
-  require "nifti"
-  # Read file:
-  obj = NIFTI::NObject.new("some_file.nii")
-  # Display some key information about the file:
-	puts obj.header['sform_code_descr']
-	=> "NIFTI_XFORM_SCANNER_ANAT"
-  # Retrieve the pixel data in a Ruby Array:
-  image = obj.get_image
-  # Load the pixel data to an NArray image object and display it on the screen:
-  image = obj.get_image_narray
+    require "nifti"
+    # Read file:
+    obj = NIFTI::NObject.new("some_file.nii")
+    # Display some key information about the file:
+	  puts obj.header['sform_code_descr']
+    => "NIFTI_XFORM_SCANNER_ANAT"
+    # Retrieve the pixel data in a Ruby Array:
+    image = obj.get_image
+    # Load the pixel data to an NArray image object and display it on the screen:
+    image = obj.get_image_narray
 
 LIMITATIONS
 -----------
@@ -72,9 +72,10 @@ RESOURCES
 * [Documentation](http://rdoc.info/github/brainmap/ruby-nifti/master/frames)
 
 
-== EXAMPLES
+Examples
+--------
 
-=== Using Extended Headers
+### Using Extended Headers ###
 
 Each NObject that is successfully read has an array of extended_header hashes.
 Each extended_header hash has 3 keys, :esize, :ecode, and :data corresponding
@@ -93,7 +94,7 @@ extended headers, and assuming that there's only 1 AFNI header per file):
     afni_xml = Nokogiri::XML(xml)
     history = afni_xml.xpath("//AFNI_atr[@atr_name='HISTORY_NOTE']").first.children.first.text
 
-=== Image Summary Statistics
+### Image Summary Statistics ###
 
 Again, this is a trivial example, but shows one usage of the library. Say you
 want to take find the mean and std dev of the entire image.
@@ -106,7 +107,10 @@ If you don't have narray installed, you could still use obj.image as a ruby
 array, but you'd have to collect the summary stats yourself.
 
 
-== COPYRIGHT 2011 Erik Kastman
+COPYRIGHT
+---------
+
+Copyright 2011 Erik Kastman
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
