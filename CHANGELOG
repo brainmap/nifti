@@ -1,0 +1,12 @@
+= 0.0.1
+
+=== (In Development) February, 2011
+
+First release.
+The library offers bare-bones functionality and should be usable for people interested in working with NIfTI files in Ruby.  The code is 98% documented according to rdoc and should hopefully be clear and straightforward to read, use and fork.
+
+Known issues:
+* Speed and Memory usage: This thing is really, really slow when packing and unpacking image data into arrays, and I've seen a single 40MB image explode into ~6GB of in-use memory.
+* Only tested with little-endian, signed short, 3d and 4d images.
+* No interfaces for viewing image data (qt, NImage, etc.).  The easiest way right now is to save out the nifti and then use another image viewing program.
+* Only supports .nii (n+1) single image files, not a split .img/.hdr

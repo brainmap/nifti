@@ -98,6 +98,11 @@ describe Nifti::NObject do
     File.exist?(@new_fixture_file_name).should be_true
   end
   
+  it "should be able to assign an image" do 
+    obj = NObject.new(@string, :bin => true, :image => true)
+    obj.image = [0] * @fixture_image_length
+  end
+  
   after :each do
     File.delete @new_fixture_file_name if File.exist? @new_fixture_file_name
   end

@@ -1,5 +1,5 @@
 module Nifti
-  # Varaibles used to determine endianness.
+  # Variables used to determine endianness.
   x = 0xdeadbeef
   endian_type = {
     Array(x).pack("V*") => false, # Little

@@ -5,6 +5,9 @@ $: << File.dirname(__FILE__)
 # The following classes are meant to be used by users of Ruby DICOM:
 # * NObject - for reading, manipulating and writing DICOM files.
 
+# Nifti is the main namespace for all Ruby NIfTI classes, constants and methods.
+module Nifti; end
+
 # Core library:
 require 'nifti/n_object'
 require 'nifti/n_read'

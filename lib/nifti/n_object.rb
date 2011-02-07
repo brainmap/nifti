@@ -12,11 +12,11 @@ module Nifti
     # A boolean which is set as true if a DObject instance has been successfully written to file (or successfully encoded).
     attr_reader :write_success
     # A hash of header information
-    attr_reader :header
+    attr_accessor :header
     # A hash of extended attributes
-    attr_reader :extended_header
+    attr_accessor :extended_header
     # An array or narray of image values
-    attr_reader :image
+    attr_accessor :image
 
     # Creates an NObject instance (NObject is an abbreviation for "Nifti object").
     #
@@ -39,12 +39,12 @@ module Nifti
     #
     # === Examples
     #
-    #   # Load a Nifti file:
+    #   # Load a Nifti file's header information:
     #   require 'nifti'
     #   obj = Nifti::NObject.new("test.nii")
-    #   # Read a Nifti file that has already been loaded into memory in a binary string:
-    #   obj = Nfiti::NObject.new(binary_string, :bin => true)
-    #   # Create an empty DICOM object & choose non-verbose behaviour:
+    #   # Read a Nifti header and image into a numerical-ruby narray:
+    #   obj = Nfiti::NObject.new("test.nii", :image => true, :narray => true)
+    #   # Create an empty NIfTI object & choose non-verbose behaviour:
     #   obj = Nifti::NObject.new(nil, :verbose => false)
     #
     def initialize(string=nil, options={})
