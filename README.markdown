@@ -68,8 +68,8 @@ RESOURCES
 ---------
 
 * [Official home page](http://brainmap.wisc.edu/pages/10-RUBY-NIFTI)
-* [Development / Source code repository](https://github.com/brainmap/ruby-nifti)
-* [Documentation](http://rdoc.info/github/brainmap/ruby-nifti/master/frames)
+* [Development / Source code repository](https://github.com/brainmap/nifti)
+* [Documentation](http://rdoc.info/github/brainmap/nifti/master/frames)
 
 
 Examples
