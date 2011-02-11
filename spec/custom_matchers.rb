@@ -1,3 +1,4 @@
+require 'rspec'
 require 'digest/md5'
 
 # Source: Matt Wynne; https://gist.github.com/736421

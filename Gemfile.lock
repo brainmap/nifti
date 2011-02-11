@@ -11,6 +11,7 @@ GEM
       rake
     narray (0.5.9.9)
     rake (0.8.7)
+    rcov (0.9.9)
     rspec (2.4.0)
       rspec-core (~> 2.4.0)
       rspec-expectations (~> 2.4.0)
@@ -27,4 +28,5 @@ DEPENDENCIES
   mocha
   narray
   nifti!
+  rcov
   rspec
