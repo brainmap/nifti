@@ -55,6 +55,12 @@ its possible that people would want to have some easy way to access NIfTI info
 using custom ruby libraries.
 
 
+GETTING HELP
+------------
+
+Feel free to use the [github issue tracker](https://github.com/brainmap/nifti/issues) 
+to post any questions, or email me directly.
+
 CREDIT
 ------
 
