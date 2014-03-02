@@ -32,7 +32,7 @@ describe NIFTI::NWrite do
     w = NWrite.new(obj, @new_fixture_file_name)
     w.write
     w.msg.should be_empty
-    File.exist? @new_fixture_file_name.should be_true
+    File.exist?(@new_fixture_file_name).should be_true
   end
   
   it "should write back an identical file if no changes were made" do
