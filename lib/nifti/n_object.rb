@@ -67,6 +67,13 @@ module NIFTI
       end
       
     end
+
+    def get_nimage
+      image = self.get_image
+      if !image.nil?
+        NImage.new(image, self.header["dim"])
+      end
+    end
     
     # Reopen the NIFTI File and retrieve image data
     def get_image

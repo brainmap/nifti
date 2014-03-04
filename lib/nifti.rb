@@ -12,6 +12,7 @@ module NIFTI; end
 require 'nifti/n_object'
 require 'nifti/n_read'
 require 'nifti/n_write'
+require 'nifti/n_image'
 require 'nifti/stream'
 require 'nifti/constants'
 
