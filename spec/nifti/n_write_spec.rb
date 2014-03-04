@@ -3,7 +3,6 @@ require 'spec_helper'
 describe NIFTI::NWrite do
   before :all do
     @n_object = NObject.new(NIFTI_TEST_FILE1)
-    @new_fixture_file_name = '5PlLoc.nii'
     @fixture_image_length = 983040
     @fixture_afni_extension_length = 5661
     @valid_header = {
@@ -26,31 +25,77 @@ describe NIFTI::NWrite do
       "intent_p3"=>0.0, "regular"=>"r"
     }
   end
-  
-  it "should write a NIfTI file" do
-    obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
-    w = NWrite.new(obj, @new_fixture_file_name)
-    w.write
-    w.msg.should be_empty
-    File.exist? @new_fixture_file_name.should be_true
+
+  context 'writing to an uncompressed file' do
+    before do
+      @new_fixture_file_name = '5PlLoc.nii'
+    end
+
+    it "should write a NIfTI file" do
+      obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
+      w = NWrite.new(obj, @new_fixture_file_name)
+      w.write
+      w.msg.should be_empty
+      File.exist?(@new_fixture_file_name).should be_true
+    end
+
+    it "should write back an identical file if no changes were made" do
+      obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
+      w = NWrite.new(obj, @new_fixture_file_name)
+      w.write
+      @new_fixture_file_name.should be_same_file_as NIFTI_TEST_FILE1
+    end
+
+    it "should write a new image after changing some variables" do
+      obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
+      obj.header['qoffset_x'] = obj.header['qoffset_x'] + 1
+      w = NWrite.new(obj, @new_fixture_file_name)
+      w.write
+      @new_fixture_file_name.should_not be_same_file_as NIFTI_TEST_FILE1
+    end
+
+    after :each do
+      File.delete @new_fixture_file_name if File.exist? @new_fixture_file_name
+    end
   end
-  
-  it "should write back an identical file if no changes were made" do
-    obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
-    w = NWrite.new(obj, @new_fixture_file_name)
-    w.write
-    @new_fixture_file_name.should be_same_file_as NIFTI_TEST_FILE1
-  end
-  
-  it "should write a new image after changing some variables" do
-    obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
-    obj.header['qoffset_x'] = obj.header['qoffset_x'] + 1
-    w = NWrite.new(obj, @new_fixture_file_name)
-    w.write
-    @new_fixture_file_name.should_not be_same_file_as NIFTI_TEST_FILE1
-  end
-  
-  after :each do
-    File.delete @new_fixture_file_name if File.exist? @new_fixture_file_name
+
+  context 'writing to a compressed file' do
+    before do
+      @new_fixture_file_name = '5PlLoc.nii.gz'
+    end
+
+    it "should write a NIfTI file" do
+      obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
+      w = NWrite.new(obj, @new_fixture_file_name)
+      w.write
+      w.msg.should be_empty
+      File.exist?(@new_fixture_file_name).should be_true
+    end
+
+    it "should write back an identical file if no changes were made" do
+      obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
+
+      w = NWrite.new(obj, @new_fixture_file_name)
+      w.write
+      writen_obj = NObject.new(@new_fixture_file_name, :image => true)
+
+      # for some reason be_same_file_as fails for gziped images
+      # but we can make sure of it opening the file again and comparing the data
+      writen_obj.get_image.should eq(obj.get_image)
+      writen_obj.header.should eq(obj.header)
+      writen_obj.extended_header.should eq(obj.extended_header)
+    end
+
+    it "should write a new image after changing some variables" do
+      obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
+      obj.header['qoffset_x'] = obj.header['qoffset_x'] + 1
+      w = NWrite.new(obj, @new_fixture_file_name)
+      w.write
+      @new_fixture_file_name.should_not be_same_file_as NIFTI_TEST_FILE1_GZ
+    end
+
+    after :each do
+      File.delete @new_fixture_file_name if File.exist? @new_fixture_file_name
+    end
   end
 end

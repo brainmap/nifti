@@ -21,5 +21,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec"
   s.add_development_dependency "mocha"
   s.add_development_dependency "narray"
-  s.add_development_dependency "rcov"
+  s.add_development_dependency "simplecov"
 end

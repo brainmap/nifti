@@ -1,3 +1,5 @@
+require 'zlib'
+
 module NIFTI
 
   # The NWrite class handles the encoding of an NObject instance to a valid NIFTI string.
@@ -9,7 +11,7 @@ module NIFTI
     attr_reader :msg
     # A boolean which reports whether the DICOM string was encoded/written successfully (true) or not (false).
     attr_reader :success
-    
+
     # Creates an NWrite instance.
     #
     # === Parameters
@@ -26,7 +28,7 @@ module NIFTI
       # Array for storing error/warning messages:
       @msg = Array.new
     end
-    
+
     # Handles the encoding of NIfTI information to string as well as writing it to file.
     def write
       # Check if we are able to create given file:
@@ -40,7 +42,7 @@ module NIFTI
         @stream = Stream.new(nil, @file_endian)
         # Tell the Stream instance which file to write to:
         @stream.set_file(@file)
-        
+
         # Write Header and Image
         write_basic_header
         write_extended_header
@@ -51,9 +53,9 @@ module NIFTI
         # Mark this write session as successful:
         @success = true
       end
-      
+
     end
-    
+
     # Write Basic Header
     def write_basic_header
       HEADER_SIGNATURE.each do |header_item|
@@ -72,7 +74,7 @@ module NIFTI
         end
       end
     end
-    
+
     # Write Extended Header
     def write_extended_header
       unless @obj.extended_header.empty?
@@ -85,16 +87,14 @@ module NIFTI
       else
         @stream.write @stream.encode([0,0,0,0], "BY")
       end
-      
-      
     end
-    
+
     # Write Image
     def write_image
       type = NIFTI_DATATYPES[@obj.header['datatype']]
       @stream.write @stream.encode(@obj.image, type)
     end
-    
+
     # Tests if the path/file is writable, creates any folders if necessary, and opens the file for writing.
     #
     # === Parameters
@@ -106,7 +106,7 @@ module NIFTI
       if File.exist?(file)
         # Is it writable?
         if File.writable?(file)
-          @file = File.new(file, "wb")
+          @file = get_new_file_writer(file)
         else
           # Existing file is not writable:
           @msg << "Error! The program does not have permission or resources to create the file you specified: (#{file})"
@@ -127,16 +127,31 @@ module NIFTI
           end
         end
         # The path to this non-existing file is verified, and we can proceed to create the file:
-        @file = File.new(file, "wb")
+        @file = get_new_file_writer(file)
       end
     end
-  
+
     # Creates various variables used when encoding the DICOM string.
     #
     def init_variables
       # Until a DICOM write has completed successfully the status is 'unsuccessful':
       @success = false
     end
-    
+
+    private
+
+    # Opens the file according to it's extension (gziped or uncompressed)
+    #
+    # === Parameters
+    #
+    # * <tt>file</tt> -- A path/file string.
+    #
+    def get_new_file_writer(file)
+      if File.extname(file) == '.gz'
+        Zlib::GzipWriter.new(File.new(file, 'wb'))
+      else
+        File.new(file, 'wb')
+      end
+    end
   end
 end
