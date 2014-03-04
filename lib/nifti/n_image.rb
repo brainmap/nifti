@@ -13,7 +13,7 @@ module NIFTI
     def [](index)
       # Dealing with Ranges is useful when the image represents a tensor
       if (index.is_a?(Fixnum) && index >= self.shape[0]) || (index.is_a?(Range) && index.last >= self.shape[0])
-        IndexError.new("Index over bounds")
+        raise IndexError.new("Index over bounds")
       elsif self.shape.count == 1
         if index.is_a?(Range)
           self.array_image[get_index_value(index.first)..get_index_value(index.last)]

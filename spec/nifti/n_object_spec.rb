@@ -26,36 +26,36 @@ describe NIFTI::NObject do
       "intent_p3"=>0.0, "regular"=>"r"
     }
   end
-  
+
   # Think of these more as integration tests, since the actual reading
   # is done and tested in the NRead spec
   it "should read a nifti file and correctly initialize header and image" do
     obj = NObject.new(NIFTI_TEST_FILE1)
-    
+
     obj.header.should == @valid_header
     obj.extended_header.should_not be_empty
     obj.extended_header.first[:esize].should == 5680
     obj.extended_header.first[:ecode].should == 4
     obj.extended_header.first[:data].length.should == @fixture_afni_extension_length
     obj.image.should be_nil
-    
+
   end
 
   it "should read a binary string and correctly initialize header and image" do
     obj = NObject.new(@string, :bin => true)
-    
+
     obj.header.should == @valid_header
     obj.extended_header.should_not be_empty
     obj.extended_header.first[:esize].should == 5680
     obj.extended_header.first[:ecode].should == 4
     obj.extended_header.first[:data].length.should == @fixture_afni_extension_length
     obj.image.should be_nil
-        
+
   end
-  
+
   it "should read a nifti file with image" do
     obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
-    
+
     obj.header.should == @valid_header
     obj.extended_header.should_not be_empty
     obj.extended_header.first[:esize].should == 5680
@@ -63,12 +63,12 @@ describe NIFTI::NObject do
     obj.extended_header.first[:data].length.should == @fixture_afni_extension_length
     obj.image.should_not be_nil
     obj.image.length.should == @fixture_image_length
-    
+
   end
-  
+
   it "should read a nifti file with image as narray" do
     obj = NObject.new(NIFTI_TEST_FILE1, :image => true, :narray => true)
-    
+
     obj.header.should == @valid_header
     obj.extended_header.should_not be_empty
     obj.extended_header.first[:esize].should == 5680
@@ -77,33 +77,38 @@ describe NIFTI::NObject do
     obj.image.should_not be_nil
     obj.image.class.should == NArray
     obj.image.dim.should == 3
-    
+
   end
-  
+
   it "should retrieve image data when requested" do
     obj = NObject.new(NIFTI_TEST_FILE1)
     obj.get_image.length.should == @fixture_image_length
   end
-  
-  
+
+
   it "should raise an error if initialized with bad argument" do
     lambda {
       NObject.new(12345)
     }.should raise_error ArgumentError, /Invalid argument/
   end
-  
+
   it "should sucessfully write a NIfTI file" do
     obj = NObject.new(NIFTI_TEST_FILE1, :image => true)
     obj.write(@new_fixture_file_name)
     File.exist?(@new_fixture_file_name).should be_true
     obj.write_success.should be_true
   end
-  
-  it "should be able to assign an image" do 
+
+  it "should be able to assign an image" do
     obj = NObject.new(@string, :bin => true, :image => true)
     obj.image = [0] * @fixture_image_length
   end
-  
+
+  it 'should retrieve an NImage' do
+    obj = NObject.new(NIFTI_TEST_FILE1)
+    obj.get_nimage.should be_a(NImage)
+  end
+
   after :each do
     File.delete @new_fixture_file_name if File.exist? @new_fixture_file_name
   end
