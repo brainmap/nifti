@@ -44,7 +44,9 @@ module NIFTI
         raise IndexError.new("Index over bounds")
       elsif self.shape.count == 1
         if index.is_a?(Range)
-          self.array_image[get_index_value(index.first)..get_index_value(index.last)]
+          value = []
+          index.each { |i| value << self.array_image[get_index_value(i)] }
+          value
         else
           self.array_image[get_index_value(index)]
         end
@@ -89,14 +91,20 @@ module NIFTI
     private
 
     def get_index_value(current_index)
-      index_value = 0
-      step = (self.dim.inject(:*)/self.dim[0])/self.dim[self.dim[0]]
-      self.previous_indexes.each_index do |index|
-        index_value+= step*self.previous_indexes[index]
-        step /= self.dim[index + 1]
+      reverse_dim = self.dim.take(self.dim[0] + 1).reverse
+      step = (reverse_dim.inject(:*)/self.dim[0])/reverse_dim[0]
+
+      index_value = current_index*step
+      step /= reverse_dim[1]
+      dim_index = 1
+
+      self.previous_indexes.reverse_each do |previous_index|
+        index_value += step*previous_index
+        dim_index += 1
+        step /= reverse_dim[dim_index] if dim_index < (reverse_dim.count - 1)
       end
 
-      index_value + current_index
+      index_value
     end
   end
 end

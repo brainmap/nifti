@@ -1,5 +1,10 @@
 require 'simplecov'
-SimpleCov.start
+SimpleCov.start do
+  add_filter "/spec/"
+  add_filter "/features/"
+
+  coverage_dir 'coverage/rspec'
+end
 
 require File.dirname(__FILE__) + '/../lib/nifti'
 require 'custom_matchers'
