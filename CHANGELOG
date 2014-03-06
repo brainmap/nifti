@@ -1,3 +1,13 @@
+= 0.0.2
+
+=== (Updates from Rafael Reggiani Manzo) March, 2014
+
+* Add Gzip Read/Write Support
+* Ruby 2.0 Compatibility
+* New NImage convenience class to index into NArray Image Data
+* Cleaned up the gemspec
+
+
 = 0.0.1
 
 === (In Development) February, 2011
