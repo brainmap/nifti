@@ -1,7 +1,7 @@
 module NIFTI
   # The NObject class is the main class for interacting with the NIFTI object.
   # Reading from and writing to files is executed from instances of this class.
-  # 
+  #
   class NObject
     # An array which contain any notices/warnings/errors that have been recorded for the NObject instance.
     attr_reader :errors
@@ -65,9 +65,16 @@ module NIFTI
       elsif not string == nil
         raise ArgumentError, "Invalid argument. Expected String (or nil), got #{string.class}."
       end
-      
     end
-    
+
+    # Reopen the NIFTI File and retrieve image data, returning, if the retrieval was successful, it as an NImage object
+    def get_nimage
+      image = self.get_image
+      if !image.nil?
+        NImage.new(image, self.header["dim"])
+      end
+    end
+
     # Reopen the NIFTI File and retrieve image data
     def get_image
       r = NRead.new(@string, :image => true)
@@ -75,7 +82,7 @@ module NIFTI
         @image = r.image_rubyarray
       end
     end
-    
+
     # Passes the NObject to the DWrite class, which writes out the header and image to the specified file.
     #
     # === Parameters
@@ -101,10 +108,10 @@ module NIFTI
         raise ArgumentError, "Invalid file_name. Expected String, got #{file_name.class}."
       end
     end
-    
+
     # Following methods are private:
-    private 
-    
+    private
+
     # Returns a NIFTI object by reading and parsing the specified file.
     # This is accomplished by initializing the NRead class, which loads NIFTI information.
     #
@@ -112,7 +119,7 @@ module NIFTI
     #
     # This method is called automatically when initializing the NObject class with a file parameter,
     # and in practice should not be called by users.
-    # 
+    #
     def read(string, options={})
       if string.is_a?(String)
         @string = string
@@ -124,7 +131,7 @@ module NIFTI
           @header = r.hdr
           @extended_header = r.extended_header
           if r.image_narray
-            @image = r.image_narray 
+            @image = r.image_narray
           elsif r.image_rubyarray
             @image = r.image_rubyarray
           end
@@ -150,6 +157,6 @@ module NIFTI
       @errors << msg
       @errors.flatten
     end
-    
+
   end
 end
