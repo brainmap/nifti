@@ -19,6 +19,6 @@ require 'nifti/constants'
 begin
   require 'narray'
 rescue LoadError => e
-  puts "NArray requried for some image visualization options."
+  puts "NArray required for some image visualization options."
   puts "Run 'gem install narray' or 'bundle install' to get it."
 end
